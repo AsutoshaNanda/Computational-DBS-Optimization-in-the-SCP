@@ -64,7 +64,7 @@ This project translates the above motivations into a **reproducible, modular cod
 │   ├── NEURO_CSV_ASUTOSHA.xlsx    # Sample dataset (downloaded from raw URL)
 │   ├── eeg brain.3.ipynb          # Notebook: basic simulation workflow
 │   └── eeg brain.4.ipynb          # Notebook: advanced analysis & visualisation
-└── README.md                      # **This file**
+└── README.md                      # This file
 ```
 
 ---
@@ -114,14 +114,14 @@ For the advanced pipeline (realistic neuronal models), open `eeg brain.4.ipynb` 
 - **Results files** – Exported as CSV/Excel for compatibility with statistical packages (R, SPSS, MATLAB).
 
 ---
-
+`eeg brain.4.ipynb` `CODE-4_FINAL.txt` 
 ## Core Scripts & Notebooks
 | File | Purpose | Highlights |
 |------|---------|------------|
-| `CODE-3_FINAL.txt` | Simple linear response model | Demonstrates core metric functions (`simulate_response`, `calculate_persistence_time`, `calculate_latency`). |
-| `CODE-4_FINAL.txt` | Advanced model with realistic neuronal dynamics | Uses placeholder functions `simulate_realistic_response`, `calculate_peak_and_persistence`. Extendable with NEURON. |
-| `eeg brain.3.ipynb` | Step‑by‑step tutorial for beginners | Inline visualisation, easy parameter tweaks. |
-| `eeg brain.4.ipynb` | Professional workflow for researchers | GridSpec layout, refined tables, export utilities. |
+| `eeg brain.3.ipynb` | Simple linear response model | Demonstrates core metric functions (`simulate_response`, `calculate_persistence_time`, `calculate_latency`). |
+| `eeg brain.4.ipynb` | Advanced model with realistic neuronal dynamics | Uses placeholder functions `simulate_realistic_response`, `calculate_peak_and_persistence`. Extendable with NEURON.|
+| `CODE-3_FINAL.txt`  | Same as `eeg brain.3.ipynb` but in .txt format |
+| `CODE-4_FINAL.txt`  | Same as `eeg brain.4.ipynb` but in .txt format |
 
 All scripts are **well‑commented** and follow PEP‑8 style guidelines.
 
