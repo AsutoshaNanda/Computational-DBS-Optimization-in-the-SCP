@@ -120,8 +120,8 @@ For the advanced pipeline (realistic neuronal models), open `eeg brain.4.ipynb` 
 |------|---------|------------|
 | `eeg brain.3.ipynb` | Simple linear response model | Demonstrates core metric functions (`simulate_response`, `calculate_persistence_time`, `calculate_latency`). |
 | `eeg brain.4.ipynb` | Advanced model with realistic neuronal dynamics | Uses placeholder functions `simulate_realistic_response`, `calculate_peak_and_persistence`. Extendable with NEURON.|
-| `CODE-3_FINAL.txt`  | Same as `eeg brain.3.ipynb` but in .txt format |
-| `CODE-4_FINAL.txt`  | Same as `eeg brain.4.ipynb` but in .txt format |
+| `CODE-3_FINAL.txt`  | Same as `eeg brain.3.ipynb` but in .txt format |  Same as `eeg brain.3.ipynb` but in .txt format |
+| `CODE-4_FINAL.txt`  | Same as `eeg brain.4.ipynb` but in .txt format |  Same as `eeg brain.4.ipynb` but in .txt format |
 
 All scripts are **well‑commented** and follow PEP‑8 style guidelines.
 
