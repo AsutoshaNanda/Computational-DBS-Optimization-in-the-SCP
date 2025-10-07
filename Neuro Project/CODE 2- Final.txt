@@ -1,0 +1,145 @@
+from neuron import h, gui
+import numpy as np
+import matplotlib.pyplot as plt
+
+def setup_electrode():
+    """Define electrode geometry and properties."""
+    electrode = h.Section(name='electrode_tip')
+    electrode.nseg = 4
+    electrode.diam = 0.01  # 0.1 mm → 0.01 cm
+    electrode.L = 0.1      # 1.0 mm → 0.1 cm
+    electrode.Ra = 100     # Axial resistance (Ohm·cm)
+    electrode.cm = 1       # Capacitance (µF/cm²)
+    return electrode
+
+def setup_axon():
+    """Define a nearby axon to record membrane potential."""
+    axon = h.Section(name='axon')
+    axon.nseg = 11
+    axon.diam = 1.0       # µm, converted internally
+    axon.L = 100          # µm, converted internally
+    axon.insert('hh')     # Hodgkin-Huxley ion channels
+    return axon
+
+def setup_stimulus(electrode, delay=1, duration=1):
+    """Attach current clamp to electrode."""
+    stim = h.IClamp(electrode(0.5))
+    stim.delay = delay  # ms
+    stim.dur = duration # ms
+    return stim
+
+def run_simulation(stim, axon, currents, sim_time=20):
+    """Run simulation for each current and record results."""
+    results = []
+    for current in currents:
+        # Create new recording vectors for each simulation
+        v_vec = h.Vector()
+        t_vec = h.Vector()
+        v_vec.record(axon(0.5)._ref_v)
+        t_vec.record(h._ref_t)
+        stim.amp = current
+        h.tstop = sim_time
+        h.finitialize(-65)
+        h.run()
+        # Save the current, voltage trace and time vector as a dictionary entry
+        results.append({
+            'current': current,
+            'voltage': np.array(v_vec),
+            'time': np.array(t_vec)
+        })
+    return results
+
+def analyze_results(results, safe_range=(-70, -65), response_threshold=-60.0):
+    """
+    Plot the axon responses, compute peak membrane potential and duration 
+    above a set response threshold, and display these in a table.
+    
+    safe_range: tuple defining the safe voltage range (in mV) for optimum current.
+    response_threshold: threshold (in mV) used to compute response duration.
+    """
+    # Create a two-panel figure: one for the plot and one for the table.
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    colors = plt.cm.viridis(np.linspace(0, 1, len(results)))
+    
+    peak_values = []
+    duration_values = []
+    optimum_index = None
+    optimum_current = None
+    
+    # Process each simulation result.
+    for i, (result, color) in enumerate(zip(results, colors)):
+        current = result['current']
+        voltage = result['voltage']
+        time = result['time']
+        
+        # Plot the membrane potential response.
+        ax1.plot(time, voltage, label=f'{current:.2f} μA', color=color)
+        
+        # Compute the peak value.
+        peak = np.max(voltage)
+        peak_values.append(peak)
+        
+        # Compute the response duration (the time the voltage stays above the threshold).
+        indices_above = np.where(voltage > response_threshold)[0]
+        if indices_above.size > 0:
+            duration = time[indices_above[-1]] - time[indices_above[0]]
+        else:
+            duration = 0.0
+        duration_values.append(duration)
+        
+        # Determine the optimum current based on safe_range criteria.
+        if np.all(voltage >= safe_range[0]) and np.all(voltage <= safe_range[1]):
+            if optimum_current is None or current < optimum_current:
+                optimum_current = current
+                optimum_index = i
+
+    # Plot formatting.
+    ax1.set_xlabel('Time (ms)')
+    ax1.set_ylabel('Membrane Potential (mV)')
+    ax1.set_title('Axon Response to DBS Stimulation')
+    ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax1.grid(True)
+    
+    # Prepare table data.
+    col_labels = ['Current (μA)', 'Peak Value (mV)', 'Duration (ms)']
+    cell_text = []
+    for cur, peak, dur in zip([r['current'] for r in results], peak_values, duration_values):
+        cell_text.append([f'{cur:.2f}', f'{peak:.2f}', f'{dur:.2f}'])
+    
+    # Create and format the table.
+    table = ax2.table(cellText=cell_text, colLabels=col_labels, loc='center')
+    ax2.axis('off')
+    ax2.set_title('Response Metrics')
+    
+    plt.tight_layout()
+    
+    # Print optimum current details if a safe response exists.
+    if optimum_current is not None:
+        print(f'Optimum current within safe range ({safe_range[0]} to {safe_range[1]} mV): '
+              f'{optimum_current:.2f} μA')
+        print(f"Peak value: {peak_values[optimum_index]:.2f} mV, "
+              f"Duration: {duration_values[optimum_index]:.2f} ms")
+    else:
+        print(f'No current found that keeps membrane potential within the safe range '
+              f'({safe_range[0]} to {safe_range[1]} mV).')
+    
+    return fig
+
+# Main execution
+if __name__ == "__main__":
+    h.load_file("stdrun.hoc")
+    
+    # Setup electrode, axon, and stimulus.
+    electrode = setup_electrode()
+    axon = setup_axon()
+    stim = setup_stimulus(electrode)
+    
+    # Define the current range in mA (corresponding to 100–500 μA).
+    currents = np.linspace(0.1, 0.5, 10)
+    
+    # Run simulation and collect results.
+    results = run_simulation(stim, axon, currents)
+    
+    # Analyze the results using safe_range and response_threshold parameters.
+    fig = analyze_results(results, safe_range=(-70, -65), response_threshold=-60.0)
+    plt.show()
